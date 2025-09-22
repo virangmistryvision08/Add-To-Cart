@@ -234,7 +234,7 @@ const AddToCart = () => {
               <CloseIcon />
             </IconButton>
           </Box>
-
+ 
           <Divider sx={{ mb: 2 }} />
 
           {cartItems.length === 0 ? (
