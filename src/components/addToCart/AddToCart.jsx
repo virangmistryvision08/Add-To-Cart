@@ -25,6 +25,7 @@ import {
   CardActions,
   Button,
   Typography,
+  Modal,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -107,6 +108,8 @@ const AddToCart = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [openDelete, setOpenDelete] = useState(false);
+  const [id, setId] = useState(null);
 
   const isMobile = useMediaQuery("(max-width:700px)");
 
@@ -119,6 +122,25 @@ const AddToCart = () => {
     dispatch(addToCart(product));
     setSnackbarMsg(`${product.productName} added to cart!`);
     setSnackbarOpen(true);
+  };
+
+  const deleteProduct_AddToCart = (productId) => {
+    setOpenDelete(true);
+    setId(productId);
+  };
+
+  const confirmationOfDeleteModal = () => {
+    dispatch(deleteItem(id));
+    setOpenDelete(false);
+    setId(null);
+  };
+
+  const cancelConfirmationOfDeleteModal = () => {
+    setOpenDelete(false);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setOpenDelete(false);
   };
 
   return (
@@ -234,7 +256,7 @@ const AddToCart = () => {
               <CloseIcon />
             </IconButton>
           </Box>
- 
+
           <Divider sx={{ mb: 2 }} />
 
           {cartItems.length === 0 ? (
@@ -247,16 +269,16 @@ const AddToCart = () => {
                   secondaryAction={
                     <IconButton
                       edge="end"
-                      onClick={() => dispatch(deleteItem(item.id))}
+                      onClick={() => deleteProduct_AddToCart(item.id)}
                     >
                       <DeleteIcon />
                     </IconButton>
                   }
                   sx={{
                     display: "flex",
-                    flexDirection: { xs: "column", sm: "row" }, // Column on mobile, row on small+ screens
-                    alignItems: { xs: "flex-start", sm: "center" }, // Optional for better alignment
-                    gap: 1, // Space between elements
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    gap: 1,
                   }}
                 >
                   <ListItemAvatar>
@@ -319,6 +341,58 @@ const AddToCart = () => {
           {snackbarMsg}
         </Alert>
       </Snackbar>
+
+      {/* Delete Modal */}
+      <Modal
+        open={openDelete}
+        onClose={handleCloseDeleteModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            width: { xs: "90%", sm:"400px" },
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            padding: {xs:"10px", sm:"20px"},
+            borderRadius: "10px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+          className="outline-none"
+        >
+          <Typography sx={{color:"GrayText"}} id="modal-modal-title" variant="h6" component="h2">
+              Are you sure you want to Remove it ?
+          </Typography>
+          <Typography
+            sx={{
+              marginTop: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              justifyContent:"end"
+            }}
+            className="flex justify-end items-center gap-3"
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={cancelConfirmationOfDeleteModal}
+            >
+              No
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={confirmationOfDeleteModal}
+            >
+              Yes
+            </Button>
+          </Typography>
+        </Box>
+      </Modal>
     </>
   );
 };
