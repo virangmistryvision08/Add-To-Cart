@@ -57,6 +57,7 @@ const products = [
     productName: "Product 1",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 100,
+    quantity: 1,
   },
   {
     id: 2,
@@ -64,6 +65,7 @@ const products = [
     productName: "Product 2",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 60,
+    quantity: 1,
   },
   {
     id: 3,
@@ -71,6 +73,7 @@ const products = [
     productName: "Product 3",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 30000,
+    quantity: 1,
   },
   {
     id: 4,
@@ -78,6 +81,7 @@ const products = [
     productName: "Product 4",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 600,
+    quantity: 1,
   },
   {
     id: 5,
@@ -85,6 +89,7 @@ const products = [
     productName: "Product 5",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 3000,
+    quantity: 1,
   },
   {
     id: 6,
@@ -92,6 +97,7 @@ const products = [
     productName: "Product 6",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 400,
+    quantity: 1,
   },
   {
     id: 7,
@@ -99,6 +105,7 @@ const products = [
     productName: "Product 7",
     about: "Lorem ipsum dolor sit amet...",
     productPrice: 1500,
+    quantity: 1,
   },
 ];
 
@@ -110,6 +117,7 @@ const AddToCart = () => {
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [id, setId] = useState(null);
+  const [quantities, setQuantities] = useState({});
 
   const isMobile = useMediaQuery("(max-width:700px)");
 
@@ -119,9 +127,12 @@ const AddToCart = () => {
   );
 
   const handleAdd = (product) => {
-    dispatch(addToCart(product));
+    const quantity = quantities[product.id] || 1;
+    dispatch(addToCart({ ...product, quantity }));
     setSnackbarMsg(`${product.productName} added to cart!`);
     setSnackbarOpen(true);
+
+    setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
   };
 
   const deleteProduct_AddToCart = (productId) => {
@@ -142,6 +153,23 @@ const AddToCart = () => {
   const handleCloseDeleteModal = () => {
     setOpenDelete(false);
   };
+
+  const increaseProductQuantity = (productId) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 1) + 1,
+    }));
+  };
+
+  const decreaseProductQuantity = (productId) => {
+    setQuantities((prev) => {
+        const newQty =  (prev[productId] || 1) - 1;
+        return {
+          ...prev,
+        [productId]: newQty > 1 ? newQty : 1,
+        }
+      })
+  }
 
   return (
     <>
@@ -191,6 +219,32 @@ const AddToCart = () => {
                     Price: ₹{product.productPrice}
                   </Typography>
                 </CardContent>
+                <ListItem>
+                  <Box
+                    sx={{ display: "flex", gap: 3, ml: { xs: "0", sm: "2" } }}
+                  >
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => decreaseProductQuantity(product.id)}
+                    >
+                      <RemoveCircleOutlineIcon />
+                    </Button>
+                    <ListItemText
+                      primary={
+                        quantities[product.id] || 1
+                      }
+                    />
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => increaseProductQuantity(product.id)}
+                    >
+                      <AddCircleOutlineIcon />
+                    </Button>
+                  </Box>
+                </ListItem>
+
                 <CardActions>
                   <Button
                     sx={{ width: "100%" }}
@@ -286,9 +340,8 @@ const AddToCart = () => {
                   </ListItemAvatar>
                   <ListItemText
                     primary={item.productName}
-                    secondary={`Price: ₹${item.productPrice} | Qty: ${
-                      item.quantity
-                    } | Total: ₹${item.productPrice * item.quantity}`}
+                    secondary={`Price: ₹${item.productPrice} | Qty: ${item.quantity
+                      } | Total: ₹${item.productPrice * item.quantity}`}
                   />
                   <Box
                     sx={{ display: "flex", gap: 1, ml: { xs: "0", sm: "2" } }}
@@ -351,10 +404,10 @@ const AddToCart = () => {
       >
         <Box
           sx={{
-            width: { xs: "90%", sm:"400px" },
+            width: { xs: "90%", sm: "400px" },
             bgcolor: "background.paper",
             boxShadow: 24,
-            padding: {xs:"10px", sm:"20px"},
+            padding: { xs: "10px", sm: "20px" },
             borderRadius: "10px",
             position: "absolute",
             top: "50%",
@@ -363,8 +416,13 @@ const AddToCart = () => {
           }}
           className="outline-none"
         >
-          <Typography sx={{color:"GrayText"}} id="modal-modal-title" variant="h6" component="h2">
-              Are you sure you want to Remove it ?
+          <Typography
+            sx={{ color: "GrayText" }}
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+          >
+            Are you sure you want to Remove it ?
           </Typography>
           <Typography
             sx={{
@@ -372,7 +430,7 @@ const AddToCart = () => {
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              justifyContent:"end"
+              justifyContent: "center",
             }}
             className="flex justify-end items-center gap-3"
           >
